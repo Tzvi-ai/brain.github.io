@@ -3,60 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Memory Game</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #4CAF50;
-            color: white;
             text-align: center;
-            padding: 1em;
+            padding: 20px;
         }
-        main {
-            margin: 20px;
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
         }
+
+        #grid div {
+            width: 100px;
+            height: 100px;
+            background-color: lightgray;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
         button {
-            padding: 10px 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 20px;
             background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
-            border-radius: 5px;
         }
+
         button:hover {
             background-color: #45a049;
-        }
-        footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #777;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to My Website!</h1>
-    </header>
-
-    <main>
-        <p>This is the main content of your website. You can edit this content and deploy it directly from GitHub Pages!</p>
-        <button onclick="showMessage()">Click me!</button>
-    </main>
-
-    <footer>
-        <p>Powered by GitHub Pages</p>
-    </footer>
-
+    <h1>Memory Game</h1>
+    <p>לחץ על הכפתור כדי להתחיל לשנן את הסדר של המספרים</p>
+    <div id="grid"></div>
+    <button onclick="startGame()">התחל משחק</button>
+    
     <script>
-        function showMessage() {
-            alert('Hello from GitHub Pages!');
+        let numberArray = [];
+        let userOrder = [];
+        let gameStarted = false;
+
+        // אתחול משחק חדש
+        function startGame() {
+            if (gameStarted) {
+                resetGame();
+            }
+
+            gameStarted = true;
+            numberArray = shuffleArray([...Array(16).keys()].map(x => x + 1)); // מס' 1 עד 16
+            userOrder = [];
+            displayNumbers();
+        }
+
+        // פונקציה להציג את המספרים
+        function displayNumbers() {
+            const grid = document.getElementById("grid");
+            grid.innerHTML = ''; // מנקה את הגריד
+
+            numberArray.forEach((number, index) => {
+                const div = document.createElement("div");
+                div.setAttribute("id", `cell-${index}`);
+                div.textContent = number;
+                div.style.backgroundColor = 'lightgray';
+                div.onclick = () => userClick(index);
+                grid.appendChild(div);
+            });
+
+            setTimeout(() => {
+                hideNumbers();
+            }, 3000); // מחביא את המספרים אחרי 3 שניות
+        }
+
+        // מחיקת המספרים
+        function hideNumbers() {
+            const grid = document.getElementById("grid");
+            for (let i = 0; i < grid.children.length; i++) {
+                grid.children[i].textContent = '';
+                grid.children[i].style.backgroundColor = 'lightgray';
+            }
+        }
+
+        // כאשר המשתמש לוחץ על ריבוע
+        function userClick(index) {
+            if (!gameStarted) return;
+
+            const cell = document.getElementById(`cell-${index}`);
+            const clickedNumber = numberArray[index];
+
+            // בודק אם המספר שהמשתמש לחץ עליו נכון
+            if (clickedNumber === userOrder.length + 1) {
+                cell.textContent = clickedNumber;
+                cell.style.backgroundColor = 'lightgreen';
+                userOrder.push(clickedNumber);
+
+                // אם כל המספרים נלחצו בסדר הנכון
+                if (userOrder.length === numberArray.length) {
+                    setTimeout(() => {
+                        alert("המשחק הושלם בהצלחה!");
+                        resetGame();
+                    }, 500);
+                }
+            } else {
+                // אם המשתמש טועה, המשחק מתאפס
+                alert("טעית! המשחק מתחיל מחדש.");
+                resetGame();
+            }
+        }
+
+        // איפוס המשחק
+        function resetGame() {
+            gameStarted = false;
+            userOrder = [];
+            const grid = document.getElementById("grid");
+            grid.innerHTML = ''; // מנקה את הגריד
+        }
+
+        // פונקציה לשיבוש סדר המספרים
+        function shuffleArray(array) {
+            let shuffledArray = array.slice();
+            for (let i = shuffledArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+            }
+            return shuffledArray;
         }
     </script>
 </body>
 </html>
+
