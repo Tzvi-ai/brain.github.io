@@ -43,35 +43,35 @@
         button:hover {
             background-color: #45a049;
         }
+
+        button.error {
+            background-color: #FF4C4C !important;
+        }
     </style>
 </head>
 <body>
     <h1>Memory Game</h1>
     <p>לחץ על הכפתור כדי להתחיל לשנן את הסדר של המספרים</p>
     <div id="grid"></div>
-    <button onclick="startGame()">התחל משחק</button>
+    <button onclick="hideNumbers()">התחל משחק</button>
     
     <script>
         let numberArray = [];
         let userOrder = [];
         let gameStarted = false;
 
-        // אתחול משחק חדש
+        // אתחול המשחק והצגת המספרים
         function startGame() {
-            if (gameStarted) {
-                resetGame();
-            }
-
-            gameStarted = true;
+            gameStarted = false;
             numberArray = shuffleArray([...Array(16).keys()].map(x => x + 1)); // מס' 1 עד 16
             userOrder = [];
             displayNumbers();
         }
 
-        // פונקציה להציג את המספרים
+        // הצגת המספרים על המסך
         function displayNumbers() {
             const grid = document.getElementById("grid");
-            grid.innerHTML = ''; // מנקה את הגריד
+            grid.innerHTML = '';
 
             numberArray.forEach((number, index) => {
                 const div = document.createElement("div");
@@ -82,18 +82,18 @@
                 grid.appendChild(div);
             });
 
-            setTimeout(() => {
-                hideNumbers();
-            }, 3000); // מחביא את המספרים אחרי 3 שניות
+            gameStarted = true;
         }
 
-        // מחיקת המספרים
+        // הסתרת המספרים כאשר המשתמש לוחץ על "התחל משחק"
         function hideNumbers() {
+            if (!gameStarted) return;
             const grid = document.getElementById("grid");
             for (let i = 0; i < grid.children.length; i++) {
                 grid.children[i].textContent = '';
                 grid.children[i].style.backgroundColor = 'lightgray';
             }
+            userOrder = [];
         }
 
         // כאשר המשתמש לוחץ על ריבוע
@@ -103,7 +103,7 @@
             const cell = document.getElementById(`cell-${index}`);
             const clickedNumber = numberArray[index];
 
-            // בודק אם המספר שהמשתמש לחץ עליו נכון
+            // אם המשתמש לוחץ נכון
             if (clickedNumber === userOrder.length + 1) {
                 cell.textContent = clickedNumber;
                 cell.style.backgroundColor = 'lightgreen';
@@ -113,22 +113,32 @@
                 if (userOrder.length === numberArray.length) {
                     setTimeout(() => {
                         alert("המשחק הושלם בהצלחה!");
-                        resetGame();
+                        startGame();
                     }, 500);
                 }
             } else {
-                // אם המשתמש טועה, המשחק מתאפס
-                alert("טעית! המשחק מתחיל מחדש.");
-                resetGame();
+                // אם המשתמש טועה
+                showError();
             }
         }
 
-        // איפוס המשחק
-        function resetGame() {
-            gameStarted = false;
-            userOrder = [];
+        // הצגת טעות והתחלה מחדש
+        function showError() {
+            const button = document.querySelector("button");
+            button.classList.add("error");
             const grid = document.getElementById("grid");
-            grid.innerHTML = ''; // מנקה את הגריד
+
+            // מציג את המספרים הנכונים
+            numberArray.forEach((num, index) => {
+                grid.children[index].textContent = num;
+                grid.children[index].style.backgroundColor = 'lightcoral';
+            });
+
+            // איפוס אחרי זמן קצר
+            setTimeout(() => {
+                button.classList.remove("error");
+                startGame();
+            }, 1500);
         }
 
         // פונקציה לשיבוש סדר המספרים
@@ -140,7 +150,9 @@
             }
             return shuffledArray;
         }
+
+        // התחלה ראשונית של המשחק
+        startGame();
     </script>
 </body>
 </html>
-
