@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>זיכרון בריבוע | משחק אימון למוח</title>
 
+    <!-- Favicon -->
+    <link rel="icon" href="https://via.placeholder.com/16" type="image/png">
+
     <!-- Google Tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=AW-10914570543"></script>
     <script>
@@ -19,18 +22,6 @@
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 20px;
-        }
-
-        #header {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-        }
-
-        #header img {
-            width: 50px;
-            height: 50px;
         }
 
         #grid {
@@ -72,31 +63,44 @@
 
         #endMessage {
             display: none;
-            margin-top: 20px;
-        }
-
-        #endMessage.show {
-            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background-color: #f1f1f1;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        #endMessage h2 {
+            margin-bottom: 15px;
+            color: #4CAF50;
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 5;
         }
     </style>
 </head>
 <body>
-    <div id="header">
-        <img src="https://via.placeholder.com/50" alt="זיכרון בריבוע">
-        <h1>זיכרון בריבוע</h1>
-    </div>
-    
+    <h1>זיכרון בריבוע</h1>
     <p>לחץ על הכפתור כדי להתחיל לשנן את הסדר של המספרים</p>
     <div id="grid"></div>
-    <button onclick="hideNumbers()">התחל משחק</button>
+    <button id="startButton" onclick="hideNumbers()">התחל משחק</button>
 
+    <div id="overlay"></div>
     <div id="endMessage">
-        <h2>כל הכבוד! סיימת בהצלחה 🎉</h2>
-        <button onclick="startGame()">התחל מחדש</button>
+        <h2>יפה מאוד! 👏</h2>
+        <button onclick="startGame()">שחק שוב</button>
     </div>
 
     <script>
@@ -109,7 +113,9 @@
             numberArray = shuffleArray([...Array(16).keys()].map(x => x + 1));
             userOrder = [];
             displayNumbers();
-            document.getElementById("endMessage").classList.remove("show");
+            document.getElementById("endMessage").style.display = "none";
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById("startButton").textContent = "התחל משחק";
 
             gtag('event', 'start_game', {
                 'event_category': 'Game',
@@ -156,7 +162,10 @@
 
                 if (userOrder.length === numberArray.length) {
                     setTimeout(() => {
-                        document.getElementById("endMessage").classList.add("show");
+                        document.getElementById("endMessage").style.display = "block";
+                        document.getElementById("overlay").style.display = "block";
+                        document.getElementById("startButton").textContent = "שחק שוב";
+                        
                         gtag('event', 'game_completed', {
                             'event_category': 'Game',
                             'event_label': 'Memory Square',
