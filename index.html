@@ -21,6 +21,18 @@
             padding: 20px;
         }
 
+        #header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #header img {
+            width: 50px;
+            height: 50px;
+        }
+
         #grid {
             display: grid;
             grid-template-columns: repeat(4, 100px);
@@ -57,28 +69,54 @@
         button.error {
             background-color: #FF4C4C !important;
         }
+
+        #endMessage {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #endMessage.show {
+            display: block;
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
-    <h1>זיכרון בריבוע</h1>
+    <div id="header">
+        <img src="https://via.placeholder.com/50" alt="זיכרון בריבוע">
+        <h1>זיכרון בריבוע</h1>
+    </div>
+    
     <p>לחץ על הכפתור כדי להתחיל לשנן את הסדר של המספרים</p>
     <div id="grid"></div>
     <button onclick="hideNumbers()">התחל משחק</button>
-    
+
+    <div id="endMessage">
+        <h2>כל הכבוד! סיימת בהצלחה 🎉</h2>
+        <button onclick="startGame()">התחל מחדש</button>
+    </div>
+
     <script>
         let numberArray = [];
         let userOrder = [];
         let gameStarted = false;
 
-        // אתחול המשחק והצגת המספרים
         function startGame() {
             gameStarted = false;
-            numberArray = shuffleArray([...Array(16).keys()].map(x => x + 1)); // מס' 1 עד 16
+            numberArray = shuffleArray([...Array(16).keys()].map(x => x + 1));
             userOrder = [];
             displayNumbers();
+            document.getElementById("endMessage").classList.remove("show");
+
+            gtag('event', 'start_game', {
+                'event_category': 'Game',
+                'event_label': 'Memory Square',
+            });
         }
 
-        // הצגת המספרים על המסך
         function displayNumbers() {
             const grid = document.getElementById("grid");
             grid.innerHTML = '';
@@ -95,7 +133,6 @@
             gameStarted = true;
         }
 
-        // הסתרת המספרים כאשר המשתמש לוחץ על "התחל משחק"
         function hideNumbers() {
             if (!gameStarted) return;
             const grid = document.getElementById("grid");
@@ -106,52 +143,52 @@
             userOrder = [];
         }
 
-        // כאשר המשתמש לוחץ על ריבוע
         function userClick(index) {
             if (!gameStarted) return;
 
             const cell = document.getElementById(`cell-${index}`);
             const clickedNumber = numberArray[index];
 
-            // אם המשתמש לוחץ נכון
             if (clickedNumber === userOrder.length + 1) {
                 cell.textContent = clickedNumber;
                 cell.style.backgroundColor = 'lightgreen';
                 userOrder.push(clickedNumber);
 
-                // אם כל המספרים נלחצו בסדר הנכון
                 if (userOrder.length === numberArray.length) {
                     setTimeout(() => {
-                        alert("המשחק הושלם בהצלחה!");
-                        startGame();
+                        document.getElementById("endMessage").classList.add("show");
+                        gtag('event', 'game_completed', {
+                            'event_category': 'Game',
+                            'event_label': 'Memory Square',
+                        });
                     }, 500);
                 }
             } else {
-                // אם המשתמש טועה
                 showError();
             }
         }
 
-        // הצגת טעות והתחלה מחדש
         function showError() {
             const button = document.querySelector("button");
             button.classList.add("error");
             const grid = document.getElementById("grid");
 
-            // מציג את המספרים הנכונים
             numberArray.forEach((num, index) => {
                 grid.children[index].textContent = num;
                 grid.children[index].style.backgroundColor = 'lightcoral';
             });
 
-            // איפוס אחרי זמן קצר
+            gtag('event', 'game_error', {
+                'event_category': 'Game',
+                'event_label': 'Memory Square',
+            });
+
             setTimeout(() => {
                 button.classList.remove("error");
                 startGame();
             }, 1500);
         }
 
-        // פונקציה לשיבוש סדר המספרים
         function shuffleArray(array) {
             let shuffledArray = array.slice();
             for (let i = shuffledArray.length - 1; i > 0; i--) {
@@ -161,7 +198,6 @@
             return shuffledArray;
         }
 
-        // התחלה ראשונית של המשחק
         startGame();
     </script>
 </body>
